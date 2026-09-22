@@ -36,4 +36,16 @@ router.post('/', (req, res) => {
     });
 });
 
+// Nueva funcionalidad: Exportación de factura a PDF (feature/pdf-export)
+router.get('/:id/pdf', (req, res) => {
+    const { id } = req.params;
+    
+    // Simulación de generación determinista de PDF sin vulnerabilidades
+    const pdfContent = `%PDF-1.4\n1 0 obj\n<< /Title (Factura ${id}) /Creator (SaaS Facturacion UNEG) >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF`;
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="factura_${id}.pdf"`);
+    res.status(200).send(Buffer.from(pdfContent));
+});
+
 module.exports = router;

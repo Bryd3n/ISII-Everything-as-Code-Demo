@@ -92,3 +92,10 @@ test('POST /api/facturas - Debe crear una factura exitosamente (201 Created)', a
     assert.strictEqual(res.body.data.monto, 199.99);
     assert.strictEqual(res.body.data.estado, 'PROCESADA');
 });
+
+test('GET /api/facturas/:id/pdf - Debe exportar la factura en formato application/pdf (feature/pdf-export)', async () => {
+    const res = await request('/api/facturas/FAC-10001/pdf');
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.headers['content-type'], 'application/pdf');
+    assert.ok(res.headers['content-disposition'].includes('factura_FAC-10001.pdf'));
+});
