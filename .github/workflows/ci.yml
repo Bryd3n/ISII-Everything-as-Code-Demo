@@ -1,4 +1,4 @@
-name: Pipeline de Integración Continua (CI & Quality Gates)
+name: "Pipeline de Integracion Continua - CI & Quality Gates"
 
 on:
   push:
@@ -24,13 +24,13 @@ jobs:
       - name: 3. Instalación limpia de dependencias (Deterministic Build)
         run: npm ci
 
-      - name: 4. Quality Gate 1: Pruebas Automatizadas
+      - name: 4. Quality Gate 1 - Pruebas Automatizadas
         run: npm test
 
-      - name: 5. Quality Gate 2: Auditoría de Seguridad de Dependencias
+      - name: 5. Quality Gate 2 - Auditoría de Seguridad de Dependencias
         run: npm audit --audit-level=high
 
-      - name: 6. Quality Gate 3: Validación del Dockerfile y Construcción
+      - name: 6. Quality Gate 3 - Validación del Dockerfile y Construcción
         run: |
           docker build -t isii-demo-app:${{ github.sha }} .
           echo "Imagen Docker construida exitosamente y verificada."
