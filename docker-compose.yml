@@ -1,0 +1,32 @@
+# ==============================================================================
+# docker-compose.yml: Orquestación Declarativa del Entorno de Desarrollo/Testing
+# Asignatura: Ingeniería de Software II (UNEG) - Unidad V: SCM & DevOps
+# ==============================================================================
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: isii-facturacion-app:1.0.0
+    container_name: isii_demo_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - LOG_LEVEL=debug
+    networks:
+      - isii_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  isii_network:
+    driver: bridge

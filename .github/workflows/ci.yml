@@ -1,0 +1,36 @@
+name: Pipeline de Integración Continua (CI & Quality Gates)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-and-build:
+    name: Verificación de Calidad y Construcción de Contenedor
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Descarga del código fuente (Checkout)
+        uses: actions/checkout@v4
+
+      - name: 2. Configuración del entorno Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 3. Instalación limpia de dependencias (Deterministic Build)
+        run: npm ci
+
+      - name: 4. Quality Gate 1: Pruebas Automatizadas
+        run: npm test
+
+      - name: 5. Quality Gate 2: Auditoría de Seguridad de Dependencias
+        run: npm audit --audit-level=high
+
+      - name: 6. Quality Gate 3: Validación del Dockerfile y Construcción
+        run: |
+          docker build -t isii-demo-app:${{ github.sha }} .
+          echo "Imagen Docker construida exitosamente y verificada."

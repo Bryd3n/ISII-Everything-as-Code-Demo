@@ -1,0 +1,21 @@
+# Ignorar dependencias locales instaladas en la máquina host
+node_modules
+npm-debug.log
+
+# Ignorar archivos de Git para no inflar la imagen
+.git
+.gitignore
+
+# Ignorar documentación, tests locales y scripts de desarrollo
+Dockerfile
+docker-compose*.yml
+.github
+README.md
+*.md
+
+# Ignorar variables de entorno secretas locales
+.env
+.env.local
+.env.*.local
+
+docs/
