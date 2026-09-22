@@ -10,6 +10,7 @@ npm-debug.log
 Dockerfile
 docker-compose*.yml
 .github
+tests/
 README.md
 *.md
 
@@ -17,5 +18,3 @@ README.md
 .env
 .env.local
 .env.*.local
-
-docs/

@@ -1,159 +1,105 @@
-# 🚀 Everything as Code & Gestión de Entornos (Docker + Node.js)
-### Universidad Nacional Experimental de Guayana (UNEG)
-**Asignatura:** Ingeniería de Software II  
-**Profesor:** Mg. Félix Márquez  
-**Unidad V:** Gestión de Configuración, Versionamiento y DevOps  
-**Responsable:** Brayan (Integrante 4)  
-**Tópicos Asignados:** Ejercicio 2 (Dockerización y Deriva de Configuración) y Pregunta 4 (Artefactos Clave de SCM)  
+# ⚡ SaaS Billing API - Microservicio Node.js
+[![CI & Quality Gates](https://github.com/Bryd3n/ISII-Everything-as-Code-Demo/actions/workflows/ci.yml/badge.svg)](https://github.com/Bryd3n/ISII-Everything-as-Code-Demo/actions/workflows/ci.yml)
+![Node Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)
+![Docker](https://img.shields.io/badge/docker-alpine3.20-blue)
+![Architecture](https://img.shields.io/badge/architecture-Everything%20as%20Code-orange)
+
+Microservicio de facturación y gestión desarrollado bajo el paradigma de **Everything as Code (EaC)**, **Infraestructura Inmutable** y **Gestión de Configuración Moderna (SCM)**.
 
 ---
 
-## 📌 1. Descripción del Proyecto
+## 🏛️ 1. Estructura del Repositorio
 
-Este repositorio constituye la evidencia práctica y demostrativa del enfoque **Everything as Code (EaC)** e **Infraestructura Inmutable** para la Unidad V de Ingeniería de Software II.
-
-Resuelve de raíz el clásico síndrome del desarrollo de software: **«en mi máquina sí funciona»**, erradicando la **deriva de configuración** (*Configuration Drift*) producida por configuraciones manuales heterogéneas y scripts de Bash no versionados en servidores de operaciones.
-
----
-
-## 🛠️ 2. Arquitectura de Componentes y SCM Moderna
-
-El proyecto materializa los **4 artefactos modernos de SCM** exigidos en la evaluación:
+El proyecto sigue una arquitectura desacoplada y modular:
 
 ```text
-📦 ISII-Everything-as-Code-Demo
- ├── 📄 .gitignore                 -> [Filtro de Integridad de la Línea Base y Prevención de Fugas]
- ├── 🐳 Dockerfile                 -> [Especificación Inmutable del Runtime y Paridad Dev/Prod]
- ├── ⚙️ .github/workflows/ci.yml   -> [Control de Cambios Automatizado con 3 Quality Gates]
- ├── 🐙 docker-compose.yml         -> [Topología Declarativa de Red y Orquestación Multicapa]
- ├── 📦 package.json & lockfile    -> [Árbol Determinista de Dependencias Transitivas]
- ├── 💻 server.js                  -> [Microservicio Express (Puerto 8080) con Endpoint /health]
- └── 📂 docs/                      -> [Documento Formal y Lámina de Defensa Oral]
-      ├── Ejercicio_2_y_Pregunta_4_Resolucion.pdf
-      ├── Ejercicio_2_y_Pregunta_4_Resolucion.md
-      └── 01_Lamina_Defensa_Ejercicio_2_y_Pregunta_4_Brayan.png
+├── .github/
+│   └── workflows/
+│       └── ci.yml             # Pipeline de Integración Continua (3 Quality Gates)
+├── src/
+│   ├── app.js                 # Configuración del servidor Express y middlewares
+│   └── routes/
+│       └── facturas.js        # Enrutador y controladores del módulo de facturación
+├── tests/
+│   └── api.test.js            # Pruebas automatizadas (Test Runner nativo de Node.js)
+├── .dockerignore              # Exclusión de artefactos en el build del contenedor
+├── .gitignore                 # Filtro de pureza para la línea base del repositorio
+├── docker-compose.yml         # Orquestación declarativa multicapa y red virtual
+├── Dockerfile                 # Especificación inmutable y determinista del runtime
+├── package.json               # Metadatos del proyecto y scripts de ejecución
+├── package-lock.json          # Fijación determinista del árbol de dependencias
+├── README.md                  # Documentación técnica de la solución
+└── server.js                  # Entrypoint principal (puerto 8080) con graceful shutdown
 ```
 
 ---
 
-## 🐳 3. Especificación Técnica del `Dockerfile` (Ejercicio 2)
+## 🐳 2. Infraestructura como Código y Eliminación de la Deriva
 
-El `Dockerfile` implementa un empaquetamiento optimizado, seguro y determinista:
+La solución erradica el problema de la **deriva de configuración** (*Configuration Drift*) y el síndrome *"en mi máquina sí funciona"* mediante la inmutabilidad de contenedores:
 
-```dockerfile
-# 1. Imagen Base Inmutable (Alpine Linux ~40MB, versión fijada contra regresiones)
-FROM node:20.17.0-alpine3.20
-
-# 2. Variables de entorno optimizadas para producción
-ENV NODE_ENV=production \
-    PORT=8080
-
-# 3. Directorio de trabajo aislado
-WORKDIR /usr/src/app
-
-# 4. Optimización de caché de capas (BuildKit)
-COPY package*.json ./
-
-# 5. Instalación determinista estricta (omite devDependencies y valida lockfile)
-RUN npm ci --only=production && \
-    npm cache clean --force
-
-# 6. Copia de código con permisos de usuario no privilegiado
-COPY --chown=node:node . .
-
-# 7. Seguridad DevSecOps: Principio de Menor Privilegio (evita escape a root en el host)
-USER node
-
-# 8. Documentación de puerto de escucha
-EXPOSE 8080
-
-# 9. Healthcheck activo integrado
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
-
-# 10. Invocación EXEC (PID 1 para manejo graceful de señales SIGTERM/SIGINT)
-CMD ["node", "server.js"]
-```
-
-### ¿Cómo elimina la Deriva de Configuración?
-* **Inmutabilidad:** La imagen de Docker es de sólo lectura, sellada criptográficamente con hashes SHA-256. Ningún cambio se realiza en caliente sobre servidores en producción.
-* **Paridad Desarrollo/Producción (*Dev/Prod Parity*):** El desarrollador ejecuta localmente el mismo binario idéntico bit por bit que corre en producción.
-* **Encapsulamiento Completo:** El contenedor incluye sistema operativo (`Alpine 3.20`), runtime (`Node 20.17.0`), dependencias exactas y código fuente, eliminando cualquier dependencia del software preinstalado en el host.
+1. **Imagen Base Inmutable:** Se fija `node:20.17.0-alpine3.20` para evitar que actualizaciones externas alteren el comportamiento del software en futuras construcciones.
+2. **Caché de Capas (BuildKit):** Se copian primero los manifiestos `package*.json` antes del código fuente, acelerando drásticamente los pipelines de CI.
+3. **Instalación Determinista:** Se emplea `npm ci --only=production`, garantizando la instalación limpia y exacta del lockfile sin dependencias innecesarias de desarrollo.
+4. **Seguridad DevSecOps:** Se aplica el principio de menor privilegio ejecutando bajo el usuario no root `USER node`.
+5. **Paridad de Entornos (Dev/Prod Parity):** El desarrollador ejecuta en su máquina local el mismo binario sellado criptográficamente que se ejecuta en producción.
 
 ---
 
-## ⚙️ 4. Pipeline de CI y Quality Gates (`.github/workflows/ci.yml`)
+## ⚙️ 3. Pipeline de CI y Quality Gates
 
-El pipeline de GitHub Actions actúa como un **comité de control de cambios automatizado**, bloqueando cualquier integración a `main` si no se cumplen las 3 Quality Gates:
+El flujo de trabajo en [`.github/workflows/ci.yml`](.github/workflows/ci.yml) implementa tres barreras de calidad automáticas antes de admitir cualquier cambio en la rama `main`:
 
-1. **Quality Gate 1 (Pruebas Unitarias Automatizadas):** Ejecución de suite de validación de lógica (`npm test`).
-2. **Quality Gate 2 (Auditoría de Seguridad de Dependencias):** Escaneo estricto de vulnerabilidades conocidas en la cadena de suministro (`npm audit --audit-level=high`).
-3. **Quality Gate 3 (Validación y Construcción del Contenedor):** Prueba de compilación inmutable de la imagen Docker (`docker build -t isii-demo-app:${{ github.sha }} .`).
-
----
-
-## 📊 5. Matriz de Garantías de SCM (Pregunta 4)
-
-| Artefacto Moderno | Garantía de **Integridad** | Garantía de **Reproducibilidad** | Garantía de **Control** |
-| :--- | :--- | :--- | :--- |
-| **`.gitignore`** | Base de código pura, libre de binarios volátiles (`node_modules`) y protección contra fuga de credenciales (`.env`). | Solo código fuente original; dependencias se reconstruyen limpiamente. | Delimita las fronteras del Ítem de Configuración bajo control de Git. |
-| **`Dockerfile`** | Empaqueta SO, runtime y código en un contenedor sellado contra modificaciones manuales. | Construcción determinista mediante tags fijos e instalación estricta (`npm ci`). | Todo cambio de infraestructura requiere un commit auditable en Git. |
-| **`.github/workflows/ci.yml`** | Aplica Quality Gates, pruebas y escaneos antes de autorizar el merge. | Verificación en máquinas virtuales limpias y homogéneas en cada commit. | Reemplaza la firma de un comité por un árbitro algorítmico verificable. |
-| **`docker-compose.yml`** | Formaliza la topología de red, aislamiento de servicios y límites de recursos. | Todo el ecosistema multicapa se levanta idéntico con un solo comando. | Centraliza en un archivo versionable las variables y enlaces entre servicios. |
+* **Gate 1 - Pruebas Automatizadas:** `npm test` ejecuta la suite de pruebas unitarias sobre endpoints de salud y lógica de negocio.
+* **Gate 2 - Auditoría de Dependencias:** `npm audit --audit-level=high` escanea vulnerabilidades conocidas en la cadena de suministro.
+* **Gate 3 - Validación de Construcción Docker:** Compilación estricta del contenedor asegurando que la imagen se ensambla sin errores.
 
 ---
 
-## 🚀 6. Guía Rápida de Ejecución
+## 📡 4. Especificación de la API
 
-### Opción A: Usando Docker Compose (Recomendado)
+| Método | Endpoint | Descripción | Código Éxito |
+| :--- | :--- | :--- | :---: |
+| `GET` | `/health` | Healthcheck activo para Docker / Kubernetes | `200 OK` |
+| `GET` | `/` | Información del servicio y estado operativo | `200 OK` |
+| `GET` | `/api/facturas` | Obtiene el listado de facturas emitidas | `200 OK` |
+| `POST` | `/api/facturas` | Procesa y emite una nueva factura | `201 Created` |
+
+### Ejemplo de Petición (Emisión de Factura):
 ```bash
-# Levantar el servicio en segundo plano
-docker compose up -d --build
-
-# Verificar estado y healthcheck
-docker compose ps
-
-# Ver logs en tiempo real
-docker compose logs -f
-```
-
-### Opción B: Construcción y Ejecución Directa con Docker
-```bash
-# 1. Construir la imagen
-docker build -t isii-facturacion-app:1.0.0 .
-
-# 2. Ejecutar el contenedor mapeando el puerto 8080
-docker run -d --name isii_app -p 8080:8080 isii-facturacion-app:1.0.0
-```
-
-### 🧪 Pruebas de Endpoints
-
-```bash
-# 1. Verificación de salud (Healthcheck)
-curl http://localhost:8080/health
-
-# Respuesta esperada:
-# {"status":"UP","timestamp":"...","uptime":...,"environment":"production"}
-
-# 2. Simulación de procesamiento de factura
 curl -X POST http://localhost:8080/api/facturas \
   -H "Content-Type: application/json" \
-  -d '{"cliente": "Clinica Veterinaria San Francisco", "monto": 245.50}'
-
-# Respuesta esperada (201 Created):
-# {"id":"FAC-49120","cliente":"Clinica Veterinaria San Francisco","monto":245.5,"fecha":"...","estado":"PROCESADA"}
+  -d '{"cliente": "Clinica Veterinaria San Francisco", "monto": 250.00}'
 ```
 
 ---
 
-## 📚 7. Documentación Formal y Referencias
+## 🚀 5. Instrucciones de Ejecución
 
-* 📄 Documento de Resolución Teórica Completa: [`docs/Ejercicio_2_y_Pregunta_4_Resolucion.pdf`](docs/Ejercicio_2_y_Pregunta_4_Resolucion.pdf)
-* 🖼️ Lámina de Defensa Oral (16:9 con espacio para webcam): [`docs/01_Lamina_Defensa_Ejercicio_2_y_Pregunta_4_Brayan.png`](docs/01_Lamina_Defensa_Ejercicio_2_y_Pregunta_4_Brayan.png)
+### Con Docker Compose (Recomendado):
+```bash
+# Iniciar contenedor en segundo plano con reconstrucción
+docker compose up -d --build
 
-### Referencias Bibliográficas (APA):
-* **Bass, L., Clements, P., & Kazman, R.** (2021). *Software Architecture in Practice* (4th ed.). Addison-Wesley.
-* **Forsgren, N., Humble, J., & Kim, G.** (2018). *Accelerate: The Science of Lean Software and DevOps*. IT Revolution Press.
-* **Humble, J., & Farley, D.** (2010). *Continuous Delivery*. Addison-Wesley.
-* **IEEE Computer Society.** (2014). *Guide to the Software Engineering Body of Knowledge (SWEBOK V4)*.
-* **Prokic, S.** (2021). *Infrastructure as Code: Dynamic Infrastructure with Terraform and Docker*. Packt Publishing.
+# Ver logs en vivo
+docker compose logs -f
+
+# Detener el contenedor
+docker compose down
+```
+
+### Con Docker CLI:
+```bash
+# Construir la imagen
+docker build -t isii-facturacion-app:1.0.0 .
+
+# Ejecutar mapeando el puerto 8080
+docker run -d --name isii_facturacion -p 8080:8080 isii-facturacion-app:1.0.0
+```
+
+### Ejecución Local para Desarrollo:
+```bash
+npm install
+npm test
+npm start
+```

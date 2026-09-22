@@ -1,13 +1,19 @@
 {
   "name": "demo-node-docker-scm",
   "version": "1.0.0",
-  "description": "Microservicio de demostración para SCM y Everything as Code - Unidad V ISII",
+  "description": "Microservicio de facturación - Everything as Code y Docker",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node -e \"console.log('Unit tests passing: 100%'); process.exit(0);\""
+    "test": "node --test tests/api.test.js"
   },
-  "keywords": ["docker", "nodejs", "scm", "ci-cd", "uneg"],
+  "keywords": [
+    "docker",
+    "nodejs",
+    "scm",
+    "ci-cd",
+    "everything-as-code"
+  ],
   "author": "Brayan",
   "license": "MIT",
   "dependencies": {
